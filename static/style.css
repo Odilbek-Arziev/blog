@@ -1,0 +1,36 @@
+#id_image {
+    width: 100%;
+    margin: 10px auto;
+}
+
+.helptext,
+.helptext.ul {
+    margin: 0 auto 20px;
+    color: rgb(249, 249, 249);
+    font-size: 15px;
+    display: block;
+}
+
+.errorlist {
+    padding: 10px;
+    list-style: none;
+    color: red;
+}
+
+#image-clear_id {
+    width: 15px;
+    height: 15px;
+}
+
+.none {
+    display: none !important;
+}
+
+.message-body {
+    min-height: 200px;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none;
+}
