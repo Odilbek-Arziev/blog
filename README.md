@@ -10,7 +10,7 @@
 
 
 ### Running project
-1. Select virtual environment `workon assistant`
+1. Select virtual environment `workon blog`
 2. Run server `python manage.py runserver`
 
 
