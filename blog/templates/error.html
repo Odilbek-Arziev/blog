@@ -1,0 +1,20 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="columns is-centered">
+        <div class="column is-5">
+            <div class="notification has-text-centered" >
+                {% if delete_post %}
+                <div class="subtitle has-text-black">Вы не можете удалить этот пост</div>
+                {% endif %}
+                {% if edit_post %}
+                <div class="subtitle has-text-black">Вы не можете отредактировать этот пост</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

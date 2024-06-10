@@ -1,0 +1,134 @@
+{% extends 'base_layout.html' %}
+{% load static from static %}
+
+{% block content %}
+<div class="box has-text-centered" style="min-width: 100%">
+    <div class="has-text-right">
+        <a href="{% url 'blog:save' post.slug %}" class="button {% if user in post.saved.all %} is-success {% endif %}">
+            <ion-icon name="bookmark-outline"></ion-icon>
+        </a>
+        {% if user == post.author %}
+        <a href="{% url 'blog:edit_post' post.slug %}" class="button is-info">
+            <ion-icon name="create-outline"></ion-icon>
+        </a>
+        <a href="{% url 'blog:delete_post' post.slug %}" class="button is-danger">
+            <ion-icon name="trash-outline"></ion-icon>
+        </a>
+        {% else %}
+        <p class="content has-text-grey">
+            Редактирование/удаление поста недоступно
+        </p>
+        {% endif %}
+    </div>
+    <div class="title has-text-black">
+        {{ post }}
+    </div>
+
+    {% if post.image %}
+    <img src="{{ post.image.url }}" alt="" class="image is-centered post-image">
+    {% else %}
+    <img src="{% static 'images/image.jpg'  %}" alt="" class="image is-centered post-image">
+    {% endif %}
+    <div class="subtitle has-text-black">
+        {{ post.text }}
+    </div>
+    <p class="content has-text-right is-italic">
+        {% if user == post.author %}
+        Вы
+        {% else %}
+        <a href="{% url 'blog:home' %}?show_author={{ post.author.id }}" class="button is-ghost">
+            {{ post.author }}
+        </a>
+        {% endif %}
+        : {{ post.date }}
+    </p>
+
+
+    <div class="columns is-gapless">
+        <form method="post" class="has-text-right" action="{% url 'blog:like' post.slug %}">
+            {% csrf_token %}
+            <button class="button {% if user in post.likes.all %} is-success {% endif %}" type="submit">
+                <ion-icon name="thumbs-up-outline"></ion-icon>
+                <span class="ml-3">
+                    {{ post.likes_counter }}
+                </span>
+            </button>
+        </form>
+        <form method="post" class="has-text-right" action="{% url 'blog:dislike' post.slug %}">
+            {% csrf_token %}
+            <button class="button {% if user in post.dislikes.all %} is-danger {% endif %}" type="submit" type="submit">
+                <ion-icon name="thumbs-down-outline"></ion-icon>
+                <span class="ml-3">
+                    {{ post.dislikes_counter }}
+                </span>
+            </button>
+        </form>
+    </div>
+    {% if post.comments_allowed %}
+    <form method="post" enctype="multipart/form-data" class="comment has-text-left">
+        {% csrf_token %}
+        {{ form }}
+        <button class="button is-success my-4">
+            Отправить
+        </button>
+    </form>
+    {% if not post.comment_set.all %}
+    <div class="has-text-centered has-text-grey-light subtitle is-5 my-4">
+        0 комментариев
+    </div>
+
+    {% else %}
+    <p class="has-text-centered is-size-3 mb-6">
+        Комментарии
+    </p>
+    <div class="columns is-multiline">
+        {% for comment in comments %}
+        <div class="column is-3">
+            <article class="message is-info">
+                <div class="message-header">
+                    {% if comment.parent %}
+                    В ответ {{comment.parent.user}} от {{comment.user}}
+                    {% else %}
+                    Добавлено {{ comment.user }} в {{ comment.date }}
+                    {% endif %}
+                </div>
+                <div class="message-body">
+                    {{ comment.body }}
+                    <form method="post" class="comment has-text-left">
+                        {% csrf_token %}
+                        {{ form }}
+                        <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+                        <button class="button is-success my-2" type="submit">
+                            Ответить
+                        </button>
+                    </form>
+                    <div class="buttons has-addons my-5">
+                        <a href="{% url 'blog:comment_delete' comment.pk %}" class="button is-small">
+                            <ion-icon name="trash-outline"></ion-icon>
+                        </a>
+                        <a href="{% url 'blog:comment_edit' comment.pk %}" class="button is-small">
+                            <ion-icon name="create-outline"></ion-icon>
+                        </a>
+                    </div>
+                    <div class="buttons is-right">
+                        <a href="{% url 'blog:comment_like' comment.pk %}"
+                            class="button {% if user in comment.likes.all %} is-success {% endif %}">
+                            <ion-icon name="thumbs-up-outline"></ion-icon>
+                        </a>
+
+                        <a href="{% url 'blog:comment_dislike' comment.pk %}"
+                            class="button {% if user in comment.dislikes.all %} is-danger {% endif %}">
+                            <ion-icon name="thumbs-down-outline"></ion-icon>
+                        </a>
+
+
+                    </div>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

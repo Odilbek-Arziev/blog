@@ -1,0 +1,14 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+<form method="post" class="site-form has-background-light comment" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <div class="has-text-centered mt-4">
+        <button class="button is-success" type="submit">Сохранить</button>
+        <a class="button is-danger" href="{% url 'blog:post' post.slug %}">
+            Назад к посту
+        </a>
+    </div>
+</form>
+{% endblock %}
