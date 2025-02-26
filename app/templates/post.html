@@ -1,0 +1,241 @@
+{% extends 'layout.html' %}
+
+
+{% block content %}
+<div class="column">
+    <div class="box" style="min-width: 100%; min-height: 80vh;">
+        <div class="is-flex is-justify-content-space-between">
+            <div>
+                <div class="tag is-medium is-info">
+                    {{post.category}}
+                </div>
+            </div>
+            <div>
+                {% if user.is_authenticated and user == post.author %}
+                <div class="buttons is-right">
+                    <a href="{% url 'app:delete_post' post.slug %}" class="button is-danger">
+                        <ion-icon name="trash"></ion-icon>
+                    </a>
+                    <a href="{% url 'app:edit_post' post.slug %}" class="button is-warning">
+                        <ion-icon name="create"></ion-icon>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="title has-text-centered">
+            {{ post.title }}
+        </div>
+
+
+        <div class="columns is-centered is-multiline" style="width: 100%;">
+            {% with photos=post.photo_set.all %}
+            {% for image in photos %}
+            <div class="column {% if photos|length > 1 %} is-5 {% else %} is-12 {% endif %}">
+                <img style="width: 100%;" src="{{ image.image.url }}" alt="" class="image post-image">
+            </div>
+            {% endfor %}
+            {% endwith %}
+        </div>
+        <div class="content has-text-centered">
+            {{ post.content }}
+        </div>
+        <hr>
+        {% include 'likes.html' with object=post object_name="post" %}
+        <div class="author">
+            <div class="columns is-centered is-vcentered">
+                <div class="column is-3">
+                    <hr />
+                </div>
+                <div class="column is-1 image">
+                    <figure class="image is-128x128">
+                        <img class="is-rounded" src="https://bulma.io/assets/images/placeholders/128x128.png" alt="" />
+                    </figure>
+                </div>
+                <div class="column is-3">
+                    <hr />
+                </div>
+            </div>
+            <div class="has-text-centered">
+                <div class="title">{{ post.author }}</div>
+                <div class="subtitle has-text-grey">Junior Backend Разработчик</div>
+                <a class="content has-text-link is-size-5">Постов: 5</a>
+            </div>
+        </div>
+    </div>
+    {% if post.comments_allowed %}
+    <div class="box">
+        {% if user.is_authenticated %}
+        <form action="" class="comment-form" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            {{ field }}
+            {% endfor %}
+            <button>Отправить</button>
+        </form>
+        <div>
+            {% for comment in comments %}
+            <div class="columns is-centered comment-container">
+                <div class="column is-11">
+                    <div class="box">
+                        <div class="title is-5">
+                            {{ comment.user }}
+                        </div>
+                        <div class="subtitle has-text-grey is-6">
+                            {{ comment.date }}
+                        </div>
+                        <div class="content">
+                            {{ comment.body }}
+                        </div>
+                        {% include 'likes.html' with object=comment object_name="comment" size="are-small" %}
+                        <div class="buttons is-right">
+
+                            {% if user == comment.user %}
+                            <a href="{% url 'app:comment_edit' pk=comment.pk %}" class="button is-small is-warning">
+                                <ion-icon name="create"></ion-icon>
+                            </a>
+                            <a href="{% url 'app:comment_delete' pk=comment.pk %}" class="button is-small is-danger">
+                                <ion-icon name="trash"></ion-icon>
+                            </a>
+                            {% endif %}
+                            <button class="button is-small" name="reply"
+                                onclick="toggleReplyForm('comment-{{ comment.pk }}')">
+                                <ion-icon name="arrow-undo"></ion-icon>
+                            </button>
+                        </div>
+                        <div class="is-hidden" id="comment-{{ comment.pk }}">
+                            <form class="reply-form" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="parent_id" value="{{ comment.pk }}">
+                                {% for field in form %}
+                                {{ field }}
+                                {% endfor %}
+                                <button>
+                                    Отправить
+                                </button>
+                            </form>
+                            {% if comment.main_comment.all %}
+                            {% for reply in comment.main_comment.all %}
+                            <div class="reply-container ml-6 mt-6">
+                                <div>
+                                    <span class="has-text-grey">
+                                        {{ reply.user }}
+                                    </span>
+                                    &nbsp;
+                                    <span class="has-text-grey-light">
+                                        {{ reply.date }}
+                                    </span>
+                                </div>
+                                <div class="is-flex is-justify-content-space-between">
+                                    <div class="content">
+                                        <span class="has-text-info">
+                                            {{ reply.parent.user }}
+                                        </span>
+                                        ,
+                                        <span>{{ reply.body }}</span>
+                                    </div>
+
+
+                                    {% include 'likes.html' with object=reply object_name="comment" size="are-small" %}
+                                </div>
+
+
+                                <div class="buttons is-right">
+
+                                    {% if user == reply.user %}
+                                    <a href="{% url 'app:comment_edit' pk=reply.pk %}"
+                                        class="button is-small is-warning">
+                                        <ion-icon name="create"></ion-icon>
+                                    </a>
+                                    <a href="{% url 'app:comment_delete' pk=reply.pk %}"
+                                        class="button is-small is-danger">
+                                        <ion-icon name="trash"></ion-icon>
+                                    </a>
+                                    {% endif %}
+                                    <button class="button is-small" name="reply"
+                                        onclick="toggleReplyForm('comment-{{ reply.pk }}')">
+                                        <ion-icon name="arrow-undo"></ion-icon>
+                                    </button>
+                                </div>
+                                <div class="is-hidden" id="comment-{{ reply.pk }}">
+
+
+                                    <form class="reply-form" method="post">
+                                        {% csrf_token %}
+
+                                        <input type="hidden" name="parent_id" value="{{ reply.pk }}">
+
+                                        {% for field in form %}
+                                        {{ field }}
+                                        {% endfor %}
+                                        <button>
+                                            Отправить
+                                        </button>
+                                    </form>
+                                </div>
+                                <hr>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="section">
+                {% if comments.has_other_pages %}
+                    <nav class="pagination is-centered">
+                        {% if comments.has_previous %}
+                        <a class="pagination-previous" href="?page={{comments.previous_page_number}}">
+                            Пред
+                        </a>
+                        <a class="pagination-link" href="?page=1">
+                            В начало
+                        </a>
+                        {% else %}
+                        <button class="pagination-previous" disabled>
+                            Пред
+                        </button>
+                        {% endif %}
+
+                        {% if comments.has_next %}
+                        <a class="pagination-next" href="?page={{ comments.next_page_number }}">
+                            Далее
+                        </a>
+                        <a href="?page={{ comments.paginator.num_pages }}" class="pagination-next">
+                            В конец
+                        </a>
+                        {% else %}
+                        <button class="pagination-next" disabled>
+                            Далее
+                        </button>
+                        {% endif %}
+
+                        <ul class="pagination-list">
+                            {% for page in comments.paginator.page_range %}
+                            <li>
+                                <a class="pagination-link 
+                                {% if page == comments.number %} is-current {% endif %}" href="?page={{page}}">{{ page }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+
+
+                    </nav>
+    {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="title is-4 has-text-centered">
+            Авторизуйтесь, чтобы увидеть комментарии
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="title has-text-white has-text-centered">
+        Автор запретил комментирование
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="modal is-active">
+        <div class="modal-background"></div>
+        <div class="modal-content box">
+            <div class="title has-text-centered">Редактирование комментария</div>
+            <form action="" method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="field">
+                        <div class="control">
+                            {{ field }}
+                        </div>
+                    </div>
+                {% endfor %}
+                <button class="button is-fullwidth is-success">
+                    Отправить
+                </button>
+            </form>
+        </div>
+        <a class="modal-close is-large" onclick="window.history.back()"></a>
+    </div>
+{% endblock %}
