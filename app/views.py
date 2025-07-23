@@ -179,4 +179,11 @@ def comment_delete(request, pk):
     if request.method == "POST":
         comment.delete()
         return redirect("app:post", slug=post)
-    return render(request, "delete_comment.html", {"slug": post})
+
+    return render(request, 'delete_comment.html', {'slug': post})
+
+
+
+def hello_Python():
+    pass
+
