@@ -7,6 +7,7 @@ from django.db.models import Q
 from .utils import *
 from django.core.paginator import Paginator
 
+
 def get_search(request):
     search_value = request.POST.get("search")
 
@@ -19,26 +20,27 @@ def get_search(request):
 def index(request):
     posts = Post.objects.all()
     print(posts)
-    posts = filter_posts(posts, request.GET.get('order_by'))
+    posts = filter_posts(posts, request.GET.get("order_by"))
     posts = Post.objects.all()
     pages = Paginator(posts, 2)
-    page = request.GET.get('page')
+    page = request.GET.get("page")
     posts = pages.get_page(page)
-    context = {
-        "posts": posts,
-        "title": "Главная страница",
-    }
-    return render(request, "index.html", context)
+    return render(
+        request,
+        "index.html",
+        {
+            "posts": posts,
+            "title": "Главная страница",
+        },
+    )
 
 
 def about(request):
-    context = {"title": "О компании"}
-    return render(request, "about.html", context)
+    return render(request, "about.html", {"title": "О компании"})
 
 
 def contacts(request):
-    context = {"title": "Контакты"}
-    return render(request, "contacts.html", context)
+    return render(request, "contacts.html", {"title": "Контакты"})
 
 
 def post_detail(request, slug):
@@ -47,7 +49,7 @@ def post_detail(request, slug):
     parent_id = request.POST.get("parent_id")
     comments = post[0].comment_set.filter(first_comment=None)
     pages = Paginator(comments, 3)
-    page = request.GET.get('page')
+    page = request.GET.get("page")
     comments = pages.get_page(page)
 
     if request.user not in post[0].views.all():
@@ -73,9 +75,11 @@ def post_detail(request, slug):
     if not post:
         return HttpResponseNotFound("Такой страницы не существует")
     post = post[0]
-  
-    context = {"post": post, "form": form, "comments": comments}
-    return render(request, "post.html", context)
+
+    return render(
+        request, "post.html", {"post": post, "form": form, "comments": comments}
+    )
+
 
 @check_auth
 def post_create(request):
@@ -97,10 +101,12 @@ def post_create(request):
         return redirect("app:index")
 
     post_form = PostForm()
-    return render(request, "post_create.html", {"post_form": post_form, 'title': 'Создание поста'})
+    return render(
+        request, "post_create.html", {"post_form": post_form, "title": "Создание поста"}
+    )
 
 
-@login_required(login_url='/users/sign_in')
+@login_required(login_url="/users/sign_in")
 def like(request):
     model = request.GET.get("model")
     action = request.GET.get("action")
@@ -144,13 +150,16 @@ def delete_post(request, slug):
 def edit_post(request, slug):
     post = Post.objects.get(slug=slug)
 
-    post_form = PostForm(request.POST or None,
-                         request.FILES or None, instance=post)
+    post_form = PostForm(request.POST or None, request.FILES or None, instance=post)
 
     if post_form.is_valid():
         post_form.save()
-        return redirect('app:post', slug=request.POST.get('slug'))
-    return render(request, 'post_create.html', {'post_form': post_form, 'title': 'Редактирование поста'})
+        return redirect("app:post", slug=request.POST.get("slug"))
+    return render(
+        request,
+        "post_create.html",
+        {"post_form": post_form, "title": "Редактирование поста"},
+    )
 
 
 @check_auth
@@ -159,8 +168,8 @@ def comment_edit(request, pk):
     form = CommentForm(request.POST or None, instance=comment)
     if form.is_valid():
         form.save()
-        return redirect('app:post', slug=comment.post.slug)
-    return render(request, 'comment_edit.html', {'form': form})
+        return redirect("app:post", slug=comment.post.slug)
+    return render(request, "comment_edit.html", {"form": form})
 
 
 @check_auth
@@ -170,9 +179,11 @@ def comment_delete(request, pk):
     if request.method == "POST":
         comment.delete()
         return redirect("app:post", slug=post)
+
     return render(request, 'delete_comment.html', {'slug': post})
 
 
 
 def hello_Python():
     pass
+
